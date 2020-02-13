@@ -90,121 +90,87 @@
 /*!**************************!*\
   !*** ./src/js/canvas.js ***!
   \**************************/
-/*! no exports provided */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils */ "./src/js/utils.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_utils__WEBPACK_IMPORTED_MODULE_0__);
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-
-var canvas = document.querySelector('canvas');
-var c = canvas.getContext('2d');
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-var mouse = {
-  x: innerWidth / 2,
-  y: innerHeight / 2
-};
-var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']; // Event Listeners
-
-addEventListener('mousemove', function (event) {
-  mouse.x = event.clientX;
-  mouse.y = event.clientY;
-});
-addEventListener('resize', function () {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-  init();
-}); // Objects
-
-var _Object =
-/*#__PURE__*/
-function () {
-  function Object(x, y, radius, color) {
-    _classCallCheck(this, Object);
-
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.color = color;
-  }
-
-  _createClass(Object, [{
-    key: "draw",
-    value: function draw() {
-      c.beginPath();
-      c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-      c.fillStyle = this.color;
-      c.fill();
-      c.closePath();
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      this.draw();
-    }
-  }]);
-
-  return Object;
-}(); // Implementation
-
-
-var objects;
-
-function init() {
-  objects = [];
-
-  for (var i = 0; i < 400; i++) {// objects.push()
-  }
-} // Animation Loop
-
-
-function animate() {
-  requestAnimationFrame(animate);
-  c.clearRect(0, 0, canvas.width, canvas.height);
-  c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y); // objects.forEach(object => {
-  //  object.update()
-  // })
-}
-
-init();
-animate();
-
-/***/ }),
-
-/***/ "./src/js/utils.js":
-/*!*************************!*\
-  !*** ./src/js/utils.js ***!
-  \*************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-function randomIntFromRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+var canvas = document.querySelector("canvas");
+var getContext = canvas.getContext("2d");
+var radius = canvas.height / 2;
+getContext.translate(radius, radius);
+radius = radius * .9;
+setInterval(drawClock, 1000);
+
+function drawClock() {
+  drawClockFace(getContext, radius);
+  drawClockNumber(getContext, radius);
+  drawClockTime(getContext, radius);
 }
 
-function randomColor(colors) {
-  return colors[Math.floor(Math.random() * colors.length)];
+function drawClockFace(getContext, radius) {
+  var gradian = null;
+  getContext.beginPath();
+  getContext.arc(0, 0, radius, 0, 2 * Math.PI);
+  getContext.fillStyle = "#eee";
+  getContext.fill();
+  gradian = getContext.createRadialGradient(0, 0, radius * .95, 0, 0, radius * 1.05);
+  gradian.addColorStop(0, "#000");
+  gradian.addColorStop(.5, "#fff");
+  gradian.addColorStop(1, "#333");
+  getContext.strokeStyle = gradian;
+  getContext.lineWidth = radius * .1;
+  getContext.stroke();
+  getContext.beginPath();
+  getContext.arc(0, 0, radius * .1, 0, 2 * Math.PI);
+  getContext.fillStyle = "#000";
+  getContext.fill();
 }
 
-function distance(x1, y1, x2, y2) {
-  var xDist = x2 - x1;
-  var yDist = y2 - y1;
-  return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+function drawClockNumber(getContext, radius) {
+  var ang;
+  var num;
+  getContext.font = radius * .15 + "px arial";
+  getContext.textBaseline = "middle";
+  getContext.textAlign = "center";
+
+  for (num = 1; num < 13; num++) {
+    ang = num * Math.PI / 6;
+    getContext.rotate(ang);
+    getContext.translate(0, -radius * 0.85);
+    getContext.rotate(-ang);
+    getContext.fillText(num.toString(), 0, 0);
+    getContext.rotate(ang);
+    getContext.translate(0, radius * 0.85);
+    getContext.rotate(-ang);
+  }
 }
 
-module.exports = {
-  randomIntFromRange: randomIntFromRange,
-  randomColor: randomColor,
-  distance: distance
-};
+function drawClockTime(getContext, radius) {
+  var now = new Date();
+  var hour = now.getHours();
+  var minute = now.getMinutes();
+  var second = now.getSeconds(); //hour
+
+  hour = hour % 12;
+  hour = hour * Math.PI / 6 + minute * Math.PI / (6 * 60) + second * Math.PI / (360 * 60);
+  drawHand(getContext, hour, radius * 0.5, radius * 0.07); //minute
+
+  minute = minute * Math.PI / 30 + second * Math.PI / (30 * 60);
+  drawHand(getContext, minute, radius * 0.8, radius * 0.07); // second
+
+  second = second * Math.PI / 30;
+  console.log(second);
+  drawHand(getContext, second, radius * 0.9, radius * 0.02);
+}
+
+function drawHand(getContext, pos, length, width) {
+  getContext.beginPath();
+  getContext.lineWidth = width;
+  getContext.moveTo(0, 0);
+  getContext.rotate(pos);
+  getContext.lineTo(0, -length);
+  getContext.stroke();
+  getContext.rotate(-pos);
+}
 
 /***/ })
 

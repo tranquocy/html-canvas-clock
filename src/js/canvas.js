@@ -1,73 +1,86 @@
-import utils from './utils'
+const canvas = document.querySelector("canvas");
+const getContext = canvas.getContext("2d");
+let radius = canvas.height / 2;
 
-const canvas = document.querySelector('canvas')
-const c = canvas.getContext('2d')
+getContext.translate(radius, radius);
 
-canvas.width = innerWidth
-canvas.height = innerHeight
+radius = radius * .9;
 
-const mouse = {
-  x: innerWidth / 2,
-  y: innerHeight / 2
+setInterval(drawClock, 1000);
+
+function drawClock() {
+  drawClockFace(getContext, radius);
+  drawClockNumber(getContext, radius);
+  drawClockTime(getContext, radius);
 }
 
-const colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']
+function drawClockFace(getContext, radius) {
+  let gradian = null;
 
-// Event Listeners
-addEventListener('mousemove', (event) => {
-  mouse.x = event.clientX
-  mouse.y = event.clientY
-})
+  getContext.beginPath();
+  getContext.arc(0, 0, radius, 0, 2 * Math.PI);
+  getContext.fillStyle = "#eee";
+  getContext.fill();
 
-addEventListener('resize', () => {
-  canvas.width = innerWidth
-  canvas.height = innerHeight
+  gradian = getContext.createRadialGradient(0, 0, radius * .95, 0, 0, radius * 1.05);
+  gradian.addColorStop(0, "#000");
+  gradian.addColorStop(.5, "#fff");
+  gradian.addColorStop(1, "#333");
+  getContext.strokeStyle = gradian;
+  getContext.lineWidth = radius * .1;
+  getContext.stroke();
 
-  init()
-})
-
-// Objects
-class Object {
-  constructor(x, y, radius, color) {
-    this.x = x
-    this.y = y
-    this.radius = radius
-    this.color = color
-  }
-
-  draw() {
-    c.beginPath()
-    c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-    c.fillStyle = this.color
-    c.fill()
-    c.closePath()
-  }
-
-  update() {
-    this.draw()
-  }
+  getContext.beginPath();
+  getContext.arc(0, 0, radius * .1, 0, 2 * Math.PI);
+  getContext.fillStyle = "#000";
+  getContext.fill();
 }
 
-// Implementation
-let objects
-function init() {
-  objects = []
+function drawClockNumber(getContext, radius) {
+  let ang;
+  let num;
 
-  for (let i = 0; i < 400; i++) {
-    // objects.push()
+  getContext.font = radius * .15 + "px arial";
+  getContext.textBaseline="middle";
+  getContext.textAlign="center";
+  
+  for(num = 1; num < 13; num++) {
+    ang = num * Math.PI / 6;
+    getContext.rotate(ang);
+    getContext.translate(0, -radius * 0.85);
+    getContext.rotate(-ang);
+    getContext.fillText(num.toString(), 0, 0);
+    getContext.rotate(ang);
+    getContext.translate(0, radius * 0.85);
+    getContext.rotate(-ang);
   }
 }
 
-// Animation Loop
-function animate() {
-  requestAnimationFrame(animate)
-  c.clearRect(0, 0, canvas.width, canvas.height)
-
-  c.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y)
-  // objects.forEach(object => {
-  //  object.update()
-  // })
+function drawClockTime(getContext, radius){
+  var now = new Date();
+  var hour = now.getHours();
+  var minute = now.getMinutes();
+  var second = now.getSeconds();
+  
+  //hour
+  hour = hour % 12;
+  hour = (hour*Math.PI/6)+(minute*Math.PI/(6*60))+(second*Math.PI/(360*60));
+  drawHand(getContext, hour, radius*0.5, radius*0.07);
+  //minute
+  minute = (minute*Math.PI/30)+(second*Math.PI/(30*60));
+  drawHand(getContext, minute, radius*0.8, radius*0.07);
+  // second
+  second = (second*Math.PI/30);
+  console.log(second);
+  drawHand(getContext, second, radius*0.9, radius*0.02);
 }
 
-init()
-animate()
+function drawHand (getContext, pos, length, width) {
+  getContext.beginPath();
+  getContext.lineWidth = width;
+  getContext.moveTo(0, 0);
+  getContext.rotate(pos);
+  getContext.lineTo(0, -length);
+  getContext.stroke();
+  getContext.rotate(-pos);
+}
